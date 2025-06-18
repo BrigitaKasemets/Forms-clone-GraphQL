@@ -1,0 +1,66 @@
+{
+  "name": "forms-clone-graphql",
+  "version": "1.0.0",
+  "description": "GraphQL API for Forms Clone - a Google Forms alternative built with Node.js, Express, and GraphQL",
+  "main": "src/server.js",
+  "type": "module",
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "nodemon src/server.js",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage",
+    "init-db": "node scripts/init-db.js",
+    "lint": "eslint src/",
+    "lint:fix": "eslint src/ --fix",
+    "build": "echo 'No build step required for Node.js'"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/BrigitaKasemets/Forms-clone-GraphQL.git"
+  },
+  "keywords": [
+    "graphql",
+    "apollo-server",
+    "forms",
+    "nodejs",
+    "express",
+    "sqlite",
+    "jwt",
+    "api"
+  ],
+  "author": "Brigita Kasemets",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/BrigitaKasemets/Forms-clone-GraphQL/issues"
+  },
+  "homepage": "https://github.com/BrigitaKasemets/Forms-clone-GraphQL#readme",
+  "dependencies": {
+    "express": "^4.18.2",
+    "graphql": "^16.8.1",
+    "graphql-http": "^1.22.0",
+    "graphql-constraint-directive": "^5.3.0",
+    "graphql-scalars": "^1.22.4",
+    "@graphql-tools/schema": "^10.0.0",
+    "jsonwebtoken": "^9.0.2",
+    "bcryptjs": "^2.4.3",
+    "sqlite3": "^5.1.6",
+    "cors": "^2.8.5",
+    "dotenv": "^16.3.1",
+    "helmet": "^7.0.0",
+    "express-rate-limit": "^6.10.0",
+    "validator": "^13.11.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.1",
+    "jest": "^29.7.0",
+    "supertest": "^6.3.3",
+    "eslint": "^8.49.0",
+    "eslint-config-airbnb-base": "^15.0.0",
+    "eslint-plugin-import": "^2.28.1"
+  },
+  "engines": {
+    "node": ">=16.0.0",
+    "npm": ">=8.0.0"
+  }
+}

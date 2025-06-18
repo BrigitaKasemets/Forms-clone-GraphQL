@@ -1,0 +1,487 @@
+# ======================================================
+# GraphQL Schema for Forms Clone API
+# ======================================================
+# This schema provides a complete GraphQL interface for
+# the Forms Clone REST API with enhanced validation,
+# error handling, and type safety.
+
+# ======================================================
+# SCALAR TYPES
+# ======================================================
+
+scalar DateTime
+scalar JWT
+scalar Email
+scalar URL
+
+# ======================================================
+# DIRECTIVES
+# ======================================================
+
+"""
+Constraint directive for input validation
+"""
+directive @constraint(
+  minLength: Int
+  maxLength: Int
+  pattern: String
+  min: Int
+  max: Int
+) on INPUT_FIELD_DEFINITION
+
+# ======================================================
+# ENUMS
+# ======================================================
+
+"""
+Available question types for forms
+Matches REST API question types exactly
+"""
+enum QuestionType {
+  shorttext
+  paragraph
+  multiplechoice
+  checkbox
+  dropdown
+}
+
+"""
+Standardized error codes for consistent error handling
+"""
+enum ErrorCode {
+  VALIDATION_ERROR
+  NOT_FOUND
+  UNAUTHORIZED
+  FORBIDDEN
+  INTERNAL_ERROR
+  DUPLICATE_EMAIL
+  INVALID_CREDENTIALS
+  FORM_NOT_FOUND
+  QUESTION_NOT_FOUND
+  RESPONSE_NOT_FOUND
+  USER_NOT_FOUND
+}
+
+# ======================================================
+# ERROR TYPES
+# ======================================================
+
+"""
+Standardized error response
+"""
+type Error {
+  code: ErrorCode!
+  message: String!
+  details: [ErrorDetail!]
+  httpStatus: Int
+}
+
+"""
+Detailed error information for specific fields
+"""
+type ErrorDetail {
+  field: String
+  message: String!
+  constraint: String
+}
+
+# ======================================================
+# SYSTEM TYPES
+# ======================================================
+
+"""
+System health status - equivalent to REST /health endpoint
+"""
+type HealthStatus {
+  status: String!
+  message: String!
+  timestamp: DateTime!
+  version: String
+}
+
+# ======================================================
+# CORE DOMAIN TYPES
+# ======================================================
+
+"""
+User represents a registered user in the system
+"""
+type User {
+  id: ID!
+  email: Email!
+  name: String!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  passwordUpdated: Boolean
+  # Relations
+  forms: [Form!]!
+}
+
+"""
+Session represents an authenticated user session
+"""
+type Session {
+  token: JWT!
+  userId: ID!
+  user: User!
+  expiresAt: DateTime
+}
+
+"""
+Form represents a questionnaire form
+"""
+type Form {
+  id: ID!
+  userId: ID!
+  title: String!
+  description: String
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  # Computed fields
+  questionCount: Int!
+  responseCount: Int!
+  # Relations
+  user: User!
+  questions: [Question!]!
+  responses: [Response!]!
+}
+
+"""
+Question represents a single question within a form
+"""
+type Question {
+  id: ID!
+  formId: ID!
+  text: String!
+  type: QuestionType!
+  required: Boolean!
+  options: [String!]!
+  order: Int
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  # Relations
+  form: Form!
+  answers: [Answer!]!
+}
+
+"""
+Response represents a user's response to a form
+"""
+type Response {
+  id: ID!
+  formId: ID!
+  respondentName: String
+  respondentEmail: Email
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  # Computed fields
+  answerCount: Int!
+  # Relations
+  form: Form!
+  answers: [Answer!]!
+}
+
+"""
+Answer represents a response to a specific question
+"""
+type Answer {
+  id: ID!
+  formId: ID!
+  responseId: ID!
+  questionId: ID!
+  answer: String!
+  # Relations
+  question: Question!
+  response: Response!
+}
+
+# ======================================================
+# INPUT TYPES
+# ======================================================
+
+"""
+Input for creating a new session (login)
+"""
+input SessionCreateInput {
+  email: Email! @constraint(pattern: "^[\\w\\.-]+@[\\w\\.-]+\\.[a-zA-Z]{2,}$")
+  password: String! @constraint(minLength: 8)
+}
+
+"""
+Input for creating a new user (registration)
+"""
+input UserCreateInput {
+  email: Email! @constraint(pattern: "^[\\w\\.-]+@[\\w\\.-]+\\.[a-zA-Z]{2,}$")
+  password: String! @constraint(minLength: 8)
+  name: String! @constraint(minLength: 1, maxLength: 100)
+}
+
+"""
+Input for updating user information
+"""
+input UserUpdateInput {
+  email: Email @constraint(pattern: "^[\\w\\.-]+@[\\w\\.-]+\\.[a-zA-Z]{2,}$")
+  password: String @constraint(minLength: 8)
+  name: String @constraint(minLength: 1, maxLength: 100)
+}
+
+"""
+Input for creating a new form
+"""
+input FormCreateInput {
+  title: String! @constraint(minLength: 1, maxLength: 200)
+  description: String @constraint(maxLength: 500)
+}
+
+"""
+Input for updating form information
+"""
+input FormUpdateInput {
+  title: String @constraint(minLength: 1, maxLength: 200)
+  description: String @constraint(maxLength: 500)
+}
+
+"""
+Input for creating a new question
+"""
+input QuestionCreateInput {
+  text: String! @constraint(minLength: 1, maxLength: 1000)
+  type: QuestionType!
+  required: Boolean = false
+  options: [String!] @constraint(maxLength: 100)
+  order: Int @constraint(min: 0)
+}
+
+"""
+Input for updating question information
+"""
+input QuestionUpdateInput {
+  text: String @constraint(minLength: 1, maxLength: 1000)
+  type: QuestionType
+  required: Boolean
+  options: [String!] @constraint(maxLength: 100)
+  order: Int @constraint(min: 0)
+}
+
+"""
+Input for a single answer within a response
+"""
+input AnswerInput {
+  questionId: ID!
+  answer: String! @constraint(maxLength: 5000)
+}
+
+"""
+Input for creating a new response
+"""
+input ResponseCreateInput {
+  answers: [AnswerInput!]!
+  respondentName: String @constraint(maxLength: 100)
+  respondentEmail: Email @constraint(pattern: "^[\\w\\.-]+@[\\w\\.-]+\\.[a-zA-Z]{2,}$")
+}
+
+"""
+Input for updating response information
+"""
+input ResponseUpdateInput {
+  answers: [AnswerInput!]
+  respondentName: String @constraint(maxLength: 100)
+  respondentEmail: Email @constraint(pattern: "^[\\w\\.-]+@[\\w\\.-]+\\.[a-zA-Z]{2,}$")
+}
+
+# ======================================================
+# FILTER AND SORTING INPUTS
+# ======================================================
+
+"""
+Input for filtering forms
+"""
+input FormFilter {
+  title: String
+  userId: ID
+  createdAfter: DateTime
+  createdBefore: DateTime
+}
+
+"""
+Sorting options
+"""
+enum SortOrder {
+  ASC
+  DESC
+}
+
+"""
+Input for sorting forms
+"""
+input FormSort {
+  field: FormSortField!
+  order: SortOrder!
+}
+
+enum FormSortField {
+  CREATED_AT
+  UPDATED_AT
+  TITLE
+}
+
+"""
+Input for sorting questions
+"""
+input QuestionSort {
+  field: QuestionSortField!
+  order: SortOrder!
+}
+
+enum QuestionSortField {
+  CREATED_AT
+  UPDATED_AT
+  ORDER
+  TEXT
+}
+
+"""
+Input for sorting responses
+"""
+input ResponseSort {
+  field: ResponseSortField!
+  order: SortOrder!
+}
+
+enum ResponseSortField {
+  CREATED_AT
+  UPDATED_AT
+  RESPONDENT_NAME
+}
+
+# ======================================================
+# RESULT TYPES
+# ======================================================
+
+# ======================================================
+# UNION TYPES FOR ERROR HANDLING
+# ======================================================
+
+union SessionResult = Session | Error
+union UserResult = User | Error
+union FormResult = Form | Error
+union QuestionResult = Question | Error
+union ResponseResult = Response | Error
+union HealthResult = HealthStatus | Error
+
+# ======================================================
+# SUCCESS TYPES
+# ======================================================
+
+"""
+Success result for mutations that don't return specific data
+"""
+type SuccessResult {
+  success: Boolean!
+  message: String
+}
+
+union DeleteResult = SuccessResult | Error
+
+# ======================================================
+# ROOT TYPES
+# ======================================================
+
+"""
+Root Query type - maps to REST GET endpoints
+"""
+type Query {
+  # System Queries (equivalent to /health)
+  health: HealthResult!
+  
+  # User Queries (equivalent to /users endpoints)
+  me: UserResult!
+  users: [User!]!
+  user(id: ID!): UserResult!
+
+  # Form Queries (equivalent to /forms endpoints)
+  forms(
+    filter: FormFilter
+    sort: FormSort
+  ): [Form!]!
+  form(id: ID!): FormResult!
+
+  # Question Queries (equivalent to /forms/{id}/questions endpoints)
+  questions(
+    formId: ID!
+    sort: QuestionSort
+  ): [Question!]!
+  question(formId: ID!, id: ID!): QuestionResult!
+
+  # Response Queries (equivalent to /forms/{id}/responses endpoints)
+  responses(
+    formId: ID!
+    sort: ResponseSort
+  ): [Response!]!
+  response(formId: ID!, id: ID!): ResponseResult!
+}
+
+"""
+Root Mutation type - maps to REST POST/PUT/PATCH/DELETE endpoints
+"""
+type Mutation {
+  # Authentication (equivalent to /sessions endpoints)
+  login(input: SessionCreateInput!): SessionResult!
+  logout: DeleteResult!
+
+  # User Management (equivalent to /users endpoints)
+  register(input: UserCreateInput!): UserResult!
+  updateUser(id: ID!, input: UserUpdateInput!): UserResult!
+  deleteUser(id: ID!): DeleteResult!
+
+  # Form Management (equivalent to /forms endpoints)
+  createForm(input: FormCreateInput!): FormResult!
+  updateForm(id: ID!, input: FormUpdateInput!): FormResult!
+  deleteForm(id: ID!): DeleteResult!
+
+  # Question Management (equivalent to /forms/{id}/questions endpoints)
+  createQuestion(formId: ID!, input: QuestionCreateInput!): QuestionResult!
+  updateQuestion(formId: ID!, id: ID!, input: QuestionUpdateInput!): QuestionResult!
+  deleteQuestion(formId: ID!, id: ID!): DeleteResult!
+  
+  # Bulk question operations (GraphQL advantage)
+  reorderQuestions(formId: ID!, questionIds: [ID!]!): FormResult!
+
+  # Response Management (equivalent to /forms/{id}/responses endpoints)
+  createResponse(formId: ID!, input: ResponseCreateInput!): ResponseResult!
+  updateResponse(formId: ID!, id: ID!, input: ResponseUpdateInput!): ResponseResult!
+  deleteResponse(formId: ID!, id: ID!): DeleteResult!
+}
+
+"""
+Root Subscription type - real-time updates (GraphQL advantage over REST)
+"""
+type Subscription {
+  # Form subscriptions
+  formUpdated(formId: ID!): Form!
+  formDeleted(userId: ID!): ID!
+
+  # Response subscriptions
+  responseAdded(formId: ID!): Response!
+  responseUpdated(formId: ID!): Response!
+  responseDeleted(formId: ID!): ID!
+
+  # Question subscriptions
+  questionAdded(formId: ID!): Question!
+  questionUpdated(formId: ID!): Question!
+  questionDeleted(formId: ID!): ID!
+  questionsReordered(formId: ID!): [Question!]!
+
+  # User subscriptions
+  userRegistered: User!
+}
+
+# ======================================================
+# SCHEMA DEFINITION
+# ======================================================
+
+schema {
+  query: Query
+  mutation: Mutation
+  subscription: Subscription
+}
