@@ -38,14 +38,13 @@ export const ResponseModel = {
       if (responseData.answers && Array.isArray(responseData.answers)) {
         for (const answer of responseData.answers) {
           const answerQuery = `
-            INSERT INTO answer_values (responseId, questionId, formId, answerText, createdAt, updatedAt)
-            VALUES (?, ?, ?, ?, datetime('now'), datetime('now'))
+            INSERT INTO answer_values (responseId, questionId, answerText, createdAt)
+            VALUES (?, ?, ?, datetime('now'))
           `;
           
           await withDb(answerQuery, [
             responseId,
             answer.questionId,
-            formId,
             answer.answer
           ]);
         }
@@ -164,15 +163,13 @@ export const ResponseModel = {
         // Insert new answers
         for (const answer of responseData.answers) {
           const answerQuery = `
-            INSERT INTO answer_values (responseId, questionId, formId, answerText, createdAt, updatedAt)
-            VALUES (?, ?, ?, ?, datetime('now'), datetime('now'))
+            INSERT INTO answer_values (responseId, questionId, answerText, createdAt)
+            VALUES (?, ?, ?, datetime('now'))
           `;
           
-          const response = await ResponseModel.getById(id);
           await withDb(answerQuery, [
             id,
             answer.questionId,
-            response.formId,
             answer.answer
           ]);
         }
@@ -212,7 +209,6 @@ export const ResponseModel = {
       
       return answers.map(answer => ({
         id: answer.id ? answer.id.toString() : null,
-        formId: answer.formId.toString(),
         responseId: answer.responseId.toString(),
         questionId: answer.questionId.toString(),
         answer: answer.answerText
@@ -234,7 +230,6 @@ export const ResponseModel = {
       
       return answers.map(answer => ({
         id: answer.id ? answer.id.toString() : null,
-        formId: answer.formId.toString(),
         responseId: answer.responseId.toString(),
         questionId: answer.questionId.toString(),
         answer: answer.answerText

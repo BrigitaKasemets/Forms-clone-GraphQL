@@ -659,7 +659,7 @@ test_question_update_comparison() {
 test_response_creation_comparison() {
     print_header "Test 15: Response Creation võrdlus"
     
-    if [ -z "$FORM_ID" ] || [ -z "$QUESTION_ID" ]; then
+    if [ -z "$FORM_ID" ] || [ -z "$QUESTION_ID" ] || [ -z "$REST_TOKEN" ] || [ -z "$GRAPHQL_TOKEN" ]; then
         print_fail "Andmed puuduvad - jätame vahele"
         return
     fi
@@ -668,15 +668,17 @@ test_response_creation_comparison() {
     local respondent_email="respondent$(date +%s)@example.com"
     local answer_text="Test answer from comparison test"
     
-    # REST POST /forms/{formId}/responses
+    # REST POST /forms/{formId}/responses (with authentication)
     local rest_resp=$(curl -s -X POST \
         -H "Content-Type: application/json" \
+        -H "Authorization: Bearer $REST_TOKEN" \
         -d "{\"answers\":[{\"questionId\":\"$QUESTION_ID\",\"answer\":\"$answer_text\"}],\"respondentName\":\"$respondent_name\",\"respondentEmail\":\"$respondent_email\"}" \
         "$REST_URL/forms/$FORM_ID/responses")
     
-    # GraphQL createResponse mutation
+    # GraphQL createResponse mutation (with authentication)
     local graphql_resp=$(curl -s -X POST \
         -H "Content-Type: application/json" \
+        -H "Authorization: Bearer $GRAPHQL_TOKEN" \
         -d "{\"query\":\"mutation { createResponse(formId: \\\"$GRAPHQL_FORM_ID\\\", input: {answers: [{questionId: \\\"$GRAPHQL_QUESTION_ID\\\", answer: \\\"GraphQL $answer_text\\\"}], respondentName: \\\"GraphQL $respondent_name\\\", respondentEmail: \\\"gql$respondent_email\\\"}) { ... on Response { id respondentName respondentEmail createdAt updatedAt answerCount } ... on Error { code message } } }\"}" \
         "$GRAPHQL_URL")
     
@@ -806,8 +808,6 @@ test_question_delete_comparison() {
         -d "{\"text\":\"$delete_question_text\",\"type\":\"shorttext\",\"required\":false}" \
         "$REST_URL/forms/$FORM_ID/questions")
     
-    print_info "REST create response: $create_resp"
-    
     local delete_question_id=$(echo "$create_resp" | grep -o '"id":[0-9]*' | head -1 | cut -d':' -f2)
     
     if [ -n "$delete_question_id" ]; then
@@ -827,8 +827,6 @@ test_question_delete_comparison() {
             -H "Authorization: Bearer $GRAPHQL_TOKEN" \
             -d "{\"query\":\"mutation { createQuestion(formId: \\\"$GRAPHQL_FORM_ID\\\", input: {text: \\\"GraphQL $delete_question_text\\\", type: shorttext, required: false}) { ... on Question { id text type required options createdAt updatedAt } ... on Error { code message } } }\"}" \
             "$GRAPHQL_URL")
-        
-        print_info "GraphQL create response: $graphql_create_resp"
         
         local graphql_delete_question_id=$(echo "$graphql_create_resp" | sed -n 's/.*"id":"\([^"]*\)".*/\1/p' | head -1)
         

@@ -6,8 +6,8 @@ import bcrypt from 'bcryptjs';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// Database file path
-const dbPath = path.join(__dirname, '../../forms.db');
+// Database file path - use the same database as REST API
+const dbPath = path.join(__dirname, '../../REST-api/forms.db');
 
 let db;
 

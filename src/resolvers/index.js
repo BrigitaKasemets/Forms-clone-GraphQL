@@ -727,9 +727,12 @@ export const resolvers = {
       }
     },
 
-    // Response management (public - no auth required for creating responses)
-    createResponse: async (_, { formId, input }) => {
+    // Response management (requires authentication to match REST API behavior)
+    createResponse: async (_, { formId, input }, context) => {
       try {
+        // Require authentication to match REST API behavior
+        const user = getAuthenticatedUser(context);
+        
         // Validate form exists
         const form = await FormModel.getById(formId);
         if (!form) {
@@ -760,6 +763,9 @@ export const resolvers = {
         const response = await ResponseModel.create(formId, input);
         return response;
       } catch (error) {
+        if (error.extensions?.code === 'UNAUTHORIZED') {
+          return createError('UNAUTHORIZED', 'Authentication required', 401);
+        }
         if (error.message.includes('question not found') || error.message.includes('FOREIGN KEY')) {
           return createError('QUESTION_NOT_FOUND', 'One or more questions not found', 404, [
             createErrorDetail('questionId', 'Invalid question ID', 'FOREIGN_KEY')

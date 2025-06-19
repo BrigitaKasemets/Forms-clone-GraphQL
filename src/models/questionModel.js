@@ -13,10 +13,10 @@ export const QuestionModel = {
     try {
       console.log('QuestionModel.create called with:', { formId, questionData });
       
-      const { text, type, required = false, options = [], order } = questionData;
+      const { text, type, required = false, options = [] } = questionData;
       const query = `
-        INSERT INTO questions (formId, questionText, questionType, required, options, questionOrder, createdAt, updatedAt)
-        VALUES (?, ?, ?, ?, ?, ?, datetime('now'), datetime('now'))
+        INSERT INTO questions (formId, questionText, questionType, required, options, createdAt, updatedAt)
+        VALUES (?, ?, ?, ?, ?, datetime('now'), datetime('now'))
       `;
       
       const params = [
@@ -24,8 +24,7 @@ export const QuestionModel = {
         text,
         type,
         required ? 1 : 0,
-        JSON.stringify(options),
-        order || 0
+        JSON.stringify(options)
       ];
       
       console.log('About to execute INSERT with params:', params);
@@ -68,7 +67,7 @@ export const QuestionModel = {
   
   getAll: async (formId) => {
     try {
-      let query = 'SELECT * FROM questions WHERE formId = ? ORDER BY questionOrder ASC, id ASC';
+      let query = 'SELECT * FROM questions WHERE formId = ? ORDER BY id ASC';
       const questions = await withDb(query, [formId]);
       
       return questions.map(question => ({
@@ -78,7 +77,7 @@ export const QuestionModel = {
         type: question.questionType,
         required: Boolean(question.required),
         options: JSON.parse(question.options || '[]'),
-        order: question.questionOrder || 0,
+        order: 0, // Default order since REST doesn't have questionOrder
         createdAt: formatDateTime(question.createdAt),
         updatedAt: formatDateTime(question.updatedAt)
       }));
@@ -90,7 +89,7 @@ export const QuestionModel = {
   getByFormId: async (formId, sort = null) => {
     try {
       let query = 'SELECT * FROM questions WHERE formId = ?';
-      let orderBy = ' ORDER BY questionOrder ASC, id ASC';
+      let orderBy = ' ORDER BY id ASC';
       
       if (sort) {
         switch (sort.field) {
@@ -101,10 +100,10 @@ export const QuestionModel = {
             orderBy = ` ORDER BY updatedAt ${sort.direction}`;
             break;
           case 'order':
-            orderBy = ` ORDER BY questionOrder ${sort.direction}`;
+            orderBy = ` ORDER BY id ${sort.direction}`;
             break;
           default:
-            orderBy = ' ORDER BY questionOrder ASC, id ASC';
+            orderBy = ' ORDER BY id ASC';
         }
       }
       
@@ -118,7 +117,7 @@ export const QuestionModel = {
         type: question.questionType,
         required: Boolean(question.required),
         options: JSON.parse(question.options || '[]'),
-        order: question.questionOrder || 0,
+        order: 0, // Default order since REST doesn't have questionOrder
         createdAt: formatDateTime(question.createdAt),
         updatedAt: formatDateTime(question.updatedAt)
       }));
@@ -145,7 +144,7 @@ export const QuestionModel = {
         type: question.questionType,
         required: Boolean(question.required),
         options: JSON.parse(question.options || '[]'),
-        order: question.questionOrder || 0,
+        order: 0, // Default order since REST doesn't have questionOrder
         createdAt: formatDateTime(question.createdAt),
         updatedAt: formatDateTime(question.updatedAt)
       };
@@ -175,10 +174,7 @@ export const QuestionModel = {
         fields.push('options = ?');
         values.push(JSON.stringify(questionData.options));
       }
-      if (questionData.order !== undefined) {
-        fields.push('questionOrder = ?');
-        values.push(questionData.order);
-      }
+      // Skip order update since REST doesn't have questionOrder
       
       fields.push('updatedAt = datetime(\'now\')');
       values.push(id);
@@ -206,7 +202,7 @@ export const QuestionModel = {
   
   reorderQuestions: async (formId, questionIds) => {
     try {
-      // Validate that all question IDs belong to the form
+      // Since REST doesn't support question ordering, we'll just validate that the questions exist
       const existingQuestions = await QuestionModel.getByFormId(formId);
       const existingIds = existingQuestions.map(q => q.id.toString());
       
@@ -222,15 +218,7 @@ export const QuestionModel = {
         throw new Error('All questions must be included in the reorder operation');
       }
       
-      // Update the order of each question
-      for (let i = 0; i < questionIds.length; i++) {
-        const questionId = questionIds[i];
-        const newOrder = i + 1; // 1-based ordering
-        
-        const query = 'UPDATE questions SET questionOrder = ?, updatedAt = datetime(\'now\') WHERE id = ? AND formId = ?';
-        await withDb(query, [newOrder, questionId, formId]);
-      }
-      
+      // No actual reordering since REST doesn't support it
       return { success: true };
     } catch (error) {
       throw error;
