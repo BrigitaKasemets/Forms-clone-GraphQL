@@ -364,9 +364,13 @@ enum ResponseSortField {
 
 union SessionResult = Session | Error
 union UserResult = User | Error
+union UsersResult = UsersList | Error
 union FormResult = Form | Error
+union FormsResult = FormsList | Error
 union QuestionResult = Question | Error
+union QuestionsResult = QuestionsList | Error
 union ResponseResult = Response | Error
+union ResponsesResult = ResponsesList | Error
 union HealthResult = HealthStatus | Error
 
 # ======================================================
@@ -378,7 +382,30 @@ Success result for mutations that don't return specific data
 """
 type SuccessResult {
   success: Boolean!
-  message: String
+  message: String!
+}
+
+"""
+List wrapper types for array responses
+"""
+type UsersList {
+  users: [User!]!
+  count: Int!
+}
+
+type FormsList {
+  forms: [Form!]!
+  count: Int!
+}
+
+type QuestionsList {
+  questions: [Question!]!
+  count: Int!
+}
+
+type ResponsesList {
+  responses: [Response!]!
+  count: Int!
 }
 
 union DeleteResult = SuccessResult | Error
@@ -396,28 +423,28 @@ type Query {
   
   # User Queries (equivalent to /users endpoints)
   me: UserResult!
-  users: [User!]!
+  users: UsersResult!
   user(id: ID!): UserResult!
 
   # Form Queries (equivalent to /forms endpoints)
   forms(
     filter: FormFilter
     sort: FormSort
-  ): [Form!]!
+  ): FormsResult!
   form(id: ID!): FormResult!
 
   # Question Queries (equivalent to /forms/{id}/questions endpoints)
   questions(
     formId: ID!
     sort: QuestionSort
-  ): [Question!]!
+  ): QuestionsResult!
   question(formId: ID!, id: ID!): QuestionResult!
 
   # Response Queries (equivalent to /forms/{id}/responses endpoints)
   responses(
     formId: ID!
     sort: ResponseSort
-  ): [Response!]!
+  ): ResponsesResult!
   response(formId: ID!, id: ID!): ResponseResult!
 }
 

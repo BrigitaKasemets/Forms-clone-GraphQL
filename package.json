@@ -7,13 +7,10 @@
   "scripts": {
     "start": "node src/server.js",
     "dev": "nodemon src/server.js",
-    "test": "jest",
-    "test:watch": "jest --watch",
-    "test:coverage": "jest --coverage",
     "init-db": "node scripts/init-db.js",
-    "lint": "eslint src/",
-    "lint:fix": "eslint src/ --fix",
-    "build": "echo 'No build step required for Node.js'"
+    "setup": "npm install && npm run init-db",
+    "quick-start": "npm run setup && npm start",
+    "client": "node client/example.js"
   },
   "repository": {
     "type": "git",
@@ -36,28 +33,32 @@
   },
   "homepage": "https://github.com/BrigitaKasemets/Forms-clone-GraphQL#readme",
   "dependencies": {
-    "express": "^4.18.2",
-    "graphql": "^16.8.1",
-    "graphql-http": "^1.22.0",
-    "graphql-constraint-directive": "^5.3.0",
-    "graphql-scalars": "^1.22.4",
+    "@apollo/server": "^4.12.2",
     "@graphql-tools/schema": "^10.0.0",
-    "jsonwebtoken": "^9.0.2",
     "bcryptjs": "^2.4.3",
-    "sqlite3": "^5.1.6",
     "cors": "^2.8.5",
     "dotenv": "^16.3.1",
-    "helmet": "^7.0.0",
+    "express": "^4.18.2",
     "express-rate-limit": "^6.10.0",
+    "graphql": "^16.8.1",
+    "graphql-constraint-directive": "^5.3.0",
+    "graphql-http": "^1.22.0",
+    "graphql-playground-html": "^1.6.30",
+    "graphql-playground-middleware-express": "^1.7.23",
+    "graphql-scalars": "^1.22.4",
+    "helmet": "^7.0.0",
+    "jsonwebtoken": "^9.0.2",
+    "node-fetch": "^3.3.2",
+    "sqlite3": "^5.1.6",
     "validator": "^13.11.0"
   },
   "devDependencies": {
-    "nodemon": "^3.0.1",
-    "jest": "^29.7.0",
-    "supertest": "^6.3.3",
     "eslint": "^8.49.0",
     "eslint-config-airbnb-base": "^15.0.0",
-    "eslint-plugin-import": "^2.28.1"
+    "eslint-plugin-import": "^2.28.1",
+    "jest": "^29.7.0",
+    "nodemon": "^3.0.1",
+    "supertest": "^6.3.3"
   },
   "engines": {
     "node": ">=16.0.0",
