@@ -2,75 +2,74 @@
 
 GraphQL API for a Google Forms alternative built with Node.js, Express, and SQLite.
 
+## Peamised käsud
 
-**Setup ja arendus:**
 ```bash
-# Täielik setup ja käivitamine
+# Installib mõlema API dependenciesid ja käivitab mõlemad serverid
 npm run quick-start
 
-# Käivita klient (test API)
+# Kontrolli serverite seisundit
+npm run status
+
+# Peatab mõlemad serverid
+npm run stop
+
+```
+## Testing
+
+Projekt sisaldab põhjalikku testisüsteemi, mis võrdleb REST ja GraphQL API vastuseid.
+
+```bash
+# Võrdle REST ja GraphQL API vastuseid
+npm run test
+
+# Kiire test serveritele
+npm run test:quick
+```
+
+**Muud kasulikud käsud:**
+```bash
+# Käivita klient (test GraphQL API)
 npm run client
 
 # Ainult andmebaasi setup
 npm run init-db
 
-# Development server
-npm run dev
 ```
 
+## Start guid 
 
+1. **Klooni repo ja käivita:**
+   ```bash
+   git clone <repo-url>
+   cd Forms-clone-GraphQL
+   npm run quick-start
+   ```
 
+2. **Mõlemad API-d töötavad:**
+   - 🟢 **GraphQL API:** http://localhost:4000
+   - 🟢 **REST API:** http://localhost:3000
 
-### Option 1: Using the startup scripts (Recommended)
+3. **Testi API-sid:**
+   ```bash
+   npm run test
+   ```
 
-**Production mode:**
-```bash
-./scripts/run.sh
-```
+## 🛠️ Alternatiivsed käivitamise viisid
 
-**Development mode (with auto-restart on file changes):**
-```bash
-./scripts/run-dev.sh
-```
-
-### Option 2: Using npm scripts
-```bash
-npm run quick-start
-```
-
-### Option 3: Setup and start separately
-```bash
-npm run setup
-npm start
-```
-
-## Installation
-
-1. Clone the repository
-
-2. Install dependencies:
+**Ainult GraphQL API:**
 ```bash
 npm install
-```
-
-3. Create environment file:
-```bash
-cp .env.example .env
-```
-
-Edit `.env` file with your settings
-
-4. Initialize the database:
-```bash
 npm run init-db
+npm run dev    # Käivitab GraphQL serveri port 4000
 ```
 
-5. Start the development server:
+**Ainult REST API:**
 ```bash
-npm run dev
+cd REST-api
+npm install
+npm run dev    # Käivitab REST serveri port 3000
 ```
-
-The GraphQL server will be available at `http://localhost:4000/graphql`
 
 ## API Usage
 
@@ -142,6 +141,3 @@ mutation LoginUser {
 }
 ```
 
-## Development
-
-For development details and additional configuration, see the "Kiirscriptid (Quick Scripts)" section above.

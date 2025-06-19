@@ -1,10 +1,11 @@
 import { withDb } from '../db/db.js';
 
-// Helper function to convert SQLite datetime string to ISO format
+// Helper function to convert SQLite datetime string to REST API compatible format
 const formatDateTime = (dateString) => {
     if (!dateString) return null;
-    const date = new Date(dateString);
-    return date.toISOString();
+    // SQLite returns datetime in 'YYYY-MM-DD HH:MM:SS' format
+    // Return it as-is to match REST API format
+    return dateString;
 };
 
 export const ResponseModel = {

@@ -9,8 +9,13 @@
     "dev": "nodemon src/server.js",
     "init-db": "node scripts/init-db.js",
     "setup": "npm install && npm run init-db",
-    "quick-start": "npm run setup && npm start",
-    "client": "node client/example.js"
+    "quick-start": "./scripts/quick-start.sh",
+    "stop": "./scripts/stop.sh",
+    "status": "./scripts/status.sh",
+    "client": "node client/example.js",
+    "test": "./tests/comparison_test.sh",
+    "test:quick": "./tests/quick_check.sh",
+    "test:all": "npm run test && npm run test:quick"
   },
   "repository": {
     "type": "git",

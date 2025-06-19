@@ -95,7 +95,7 @@ System health status - equivalent to REST /health endpoint
 type HealthStatus {
   status: String!
   message: String!
-  timestamp: DateTime!
+  timestamp: String!
   version: String
 }
 
@@ -110,8 +110,8 @@ type User {
   id: ID!
   email: Email!
   name: String!
-  createdAt: DateTime!
-  updatedAt: DateTime!
+  createdAt: String!
+  updatedAt: String!
   passwordUpdated: Boolean
   # Relations
   forms: [Form!]!
@@ -135,8 +135,8 @@ type Form {
   userId: ID!
   title: String!
   description: String
-  createdAt: DateTime!
-  updatedAt: DateTime!
+  createdAt: String!
+  updatedAt: String!
   # Computed fields
   questionCount: Int!
   responseCount: Int!
@@ -157,8 +157,8 @@ type Question {
   required: Boolean!
   options: [String!]!
   order: Int
-  createdAt: DateTime!
-  updatedAt: DateTime!
+  createdAt: String!
+  updatedAt: String!
   # Relations
   form: Form!
   answers: [Answer!]!
@@ -172,8 +172,8 @@ type Response {
   formId: ID!
   respondentName: String
   respondentEmail: Email
-  createdAt: DateTime!
-  updatedAt: DateTime!
+  createdAt: String!
+  updatedAt: String!
   # Computed fields
   answerCount: Int!
   # Relations
