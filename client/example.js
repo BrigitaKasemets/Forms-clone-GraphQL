@@ -586,7 +586,7 @@ async function testCreateResponse() {
     }
   };
 
-  const result = await makeGraphQLRequest(query, variables);
+  const result = await makeGraphQLRequest(query, variables, true); // Need authentication for response creation
   if (result.success && result.data.createResponse.id) {
     responseId = result.data.createResponse.id;
     log(`✅ Response created: ${JSON.stringify(result.data.createResponse, null, 2)}`, 'success');

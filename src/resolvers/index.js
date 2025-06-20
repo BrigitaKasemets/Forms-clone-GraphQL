@@ -367,7 +367,11 @@ export const resolvers = {
     response: async (_, { formId, id }, context) => {
       try {
         getAuthenticatedUser(context);
-        return await ResponseModel.getById(id);
+        const response = await ResponseModel.findById(formId, id);
+        if (!response) {
+          return createError('RESPONSE_NOT_FOUND', `Response with ID ${id} not found`, 404);
+        }
+        return response;
       } catch (error) {
         if (error.extensions?.code === 'UNAUTHORIZED') {
           return createError('UNAUTHORIZED', 'Authentication required', 401);
@@ -784,6 +788,12 @@ export const resolvers = {
           return createError('FORBIDDEN', 'You can only update responses in your own forms', 403);
         }
 
+        // First check if response exists in this form
+        const existingResponse = await ResponseModel.findById(formId, id);
+        if (!existingResponse) {
+          return createError('RESPONSE_NOT_FOUND', `Response with ID ${id} not found`, 404);
+        }
+
         const response = await ResponseModel.update(id, input);
         return response;
       } catch (error) {
@@ -801,6 +811,12 @@ export const resolvers = {
         
         if (form.userId !== user.id) {
           return createError('FORBIDDEN', 'You can only delete responses from your own forms', 403);
+        }
+
+        // First check if response exists in this form
+        const existingResponse = await ResponseModel.findById(formId, id);
+        if (!existingResponse) {
+          return createError('RESPONSE_NOT_FOUND', `Response with ID ${id} not found`, 404);
         }
 
         await ResponseModel.delete(id);

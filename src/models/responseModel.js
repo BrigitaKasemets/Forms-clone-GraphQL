@@ -56,7 +56,8 @@ export const ResponseModel = {
         respondentName: response.respondentName,
         respondentEmail: response.respondentEmail,
         createdAt: formatDateTime(response.createdAt),
-        updatedAt: formatDateTime(response.updatedAt)
+        updatedAt: formatDateTime(response.updatedAt),
+        answerCount: responseData.answers ? responseData.answers.length : 0
       };
     } catch (error) {
       throw error;
@@ -128,6 +129,46 @@ export const ResponseModel = {
         respondentEmail: response.respondentEmail,
         createdAt: formatDateTime(response.createdAt),
         updatedAt: formatDateTime(response.updatedAt)
+      };
+    } catch (error) {
+      throw error;
+    }
+  },
+
+  findById: async (formId, responseId) => {
+    try {
+      const query = 'SELECT * FROM responses WHERE id = ? AND formId = ?';
+      const responses = await withDb(query, [responseId, formId]);
+      
+      if (responses.length === 0) {
+        return null;
+      }
+      
+      const response = responses[0];
+      
+      // Get answers for this response
+      const answersQuery = `
+        SELECT questionId, answerText AS answer 
+        FROM answer_values 
+        WHERE responseId = ?
+      `;
+      const answers = await withDb(answersQuery, [responseId]);
+      
+      // Count answers
+      const answerCount = answers.length;
+      
+      return {
+        id: response.id.toString(),
+        formId: response.formId.toString(),
+        respondentName: response.respondentName,
+        respondentEmail: response.respondentEmail,
+        createdAt: formatDateTime(response.createdAt),
+        updatedAt: formatDateTime(response.updatedAt),
+        answerCount,
+        answers: answers.map(answer => ({
+          questionId: answer.questionId.toString(),
+          answer: answer.answer
+        }))
       };
     } catch (error) {
       throw error;

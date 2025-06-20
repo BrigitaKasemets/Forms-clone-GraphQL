@@ -5,8 +5,8 @@ import { fileURLToPath } from 'url';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// Database file path
-const dbPath = path.join(__dirname, '..', 'forms.db');
+// Database file path - use the same database as REST API
+const dbPath = path.join(__dirname, '..', 'REST-api', 'forms.db');
 
 console.log('Initializing database...');
 console.log(`Database path: ${dbPath}`);
@@ -73,7 +73,7 @@ const createTables = [
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     responseId INTEGER NOT NULL,
     questionId INTEGER NOT NULL,
-    formId INTEGER NOT NULL,
+    formId INTEGER, -- Optional field for consistency with REST API expectations
     answerText TEXT NOT NULL,
     createdAt DATETIME DEFAULT CURRENT_TIMESTAMP,
     updatedAt DATETIME DEFAULT CURRENT_TIMESTAMP,
